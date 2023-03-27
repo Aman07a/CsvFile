@@ -5,11 +5,15 @@ export class CustomerCsvFileWriter {
   constructor(private fileWriter: FileWriter) {}
 
   writeCustomers(fileName: string, customers: Customer[]) {
-    for (let index = 0; index < customers.length; index += 1) {
-      this.fileWriter.writeLine(
-        fileName,
-        `${customers[index].name},${customers[index].contactNumber}`
-      );
+    if (customers === null) {
+      throw Error("argument is null: `customers`");
     }
+    customers.forEach((customer) => {
+      this.fileWriter.writeLine(fileName, this.formatAsCsvRow(customer));
+    });
+  }
+
+  private formatAsCsvRow(customer: Customer): string {
+    return `${customer.name},${customer.contactNumber}`;
   }
 }

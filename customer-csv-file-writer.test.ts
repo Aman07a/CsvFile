@@ -10,20 +10,48 @@ import { CustomerCsvFileWriter } from "./customer-csv-file-writer";
 import { FileWriter } from "./file-writer";
 
 describe("CustomerCsvFileWriter", () => {
-  describe("one customer", () => {
-    test.each([
-      { customer: createCustomer("Peter Wiles", "12345697123") },
-      { customer: createCustomer("Brendon Page", "45648484654") },
-    ])("customer: $expected", ({ customer }) => {
+  describe("null customers array", () => {
+    test("should throw an argument exception", () => {
       // Arrange
       const fileWriter = createFileWriter();
       const sut = createCustomerCsvFileWriter(fileWriter);
       const fileName = "customers.csv";
+      // Act/Assert
+      expect(() => sut.writeCustomers(fileName, null!)).toThrowError(
+        "customers"
+      );
+    });
+  });
+
+  describe("no customer", () => {
+    test("should not write any lines", () => {
+      // Arrange
+      const fileWriter = createFileWriter();
+      const sut = createCustomerCsvFileWriter(fileWriter);
+      const fileName = "customers.csv";
+      const customers: Customer[] = [];
       // Act
-      sut.writeCustomers(fileName, [customer]);
+      sut.writeCustomers(fileName, customers);
+      // Assert
+      assertCustomerWereWrittenToFile(fileWriter, fileName, customers);
+    });
+  });
+
+  describe("one customer", () => {
+    test.each([
+      { customer: createCustomer("Peter Wiles", "12345697123") },
+      { customer: createCustomer("Brendon Page", "45648484654") },
+    ])("customer: $customer", ({ customer }) => {
+      // Arrange
+      const fileWriter = createFileWriter();
+      const sut = createCustomerCsvFileWriter(fileWriter);
+      const fileName = "customers.csv";
+      const customers = [customer];
+      // Act
+      sut.writeCustomers(fileName, customers);
       // Assert
       expect(fileWriter.writeLine).toHaveBeenCalledTimes(1);
-      assertCustomerWasWrittenToFile(fileWriter, fileName, customer);
+      assertCustomerWereWrittenToFile(fileWriter, fileName, customers);
     });
   });
 
@@ -41,13 +69,21 @@ describe("CustomerCsvFileWriter", () => {
       // Act
       sut.writeCustomers(fileName, customers);
       // Assert
-      expect(fileWriter.writeLine).toHaveBeenCalledTimes(3);
-      assertCustomerWasWrittenToFile(fileWriter, fileName, customers[0]);
-      assertCustomerWasWrittenToFile(fileWriter, fileName, customers[1]);
-      assertCustomerWasWrittenToFile(fileWriter, fileName, customers[2]);
+      assertCustomerWereWrittenToFile(fileWriter, fileName, customers);
     });
   });
 });
+
+function assertCustomerWereWrittenToFile(
+  fileWriter: FileWriter,
+  fileName: string,
+  customers: Customer[]
+) {
+  customers.forEach((customer) => {
+    assertCustomerWasWrittenToFile(fileWriter, fileName, customer);
+  });
+  expect(fileWriter.writeLine).toHaveBeenCalledTimes(customers.length);
+}
 
 function assertCustomerWasWrittenToFile(
   fileWriter: FileWriter,
