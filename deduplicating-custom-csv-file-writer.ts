@@ -1,9 +1,9 @@
 import { Customer } from "./customer";
-import { CustomerCsvFileWriter } from "./customer-csv-file-writer";
+import { CustomerFileWriter } from "./CustomerFileWriter";
 
-export class DeduplicatingCustomerCsvFileWriter {
-  constructor(private customerCsvFileWriter: CustomerCsvFileWriter) {}
+export class DeduplicatingCustomerCsvFileWriter implements CustomerFileWriter {
+  constructor(private customerFileWriter: CustomerFileWriter) {}
   writeCustomers(fileName: string, customers: Customer[]) {
-    this.customerCsvFileWriter.writeCustomers(fileName, customers);
+    this.customerFileWriter.writeCustomers(fileName, customers);
   }
 }

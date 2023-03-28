@@ -1,8 +1,10 @@
+import { CustomerFileWriter } from "./CustomerFileWriter";
 import { Customer } from "./customer";
 import { FileWriter } from "./file-writer";
 
-export class CustomerCsvFileWriter {
+export class CustomerCsvFileWriter implements CustomerFileWriter {
   constructor(private fileWriter: FileWriter) {}
+
   writeCustomers(fileName: string, customers: Customer[]) {
     if (customers === null) {
       throw Error("argument is null: `customers`");
