@@ -7,6 +7,7 @@
 
 import { Customer } from "./customer";
 import { CustomerCsvFileWriter } from "./customer-csv-file-writer";
+import { BatchedCustomerCsvFileWriter } from "./customer-csv-file-writer";
 import { FileWriter } from "./file-writer";
 
 describe("CustomerCsvFileWriter", () => {
@@ -81,10 +82,11 @@ describe("CustomerCsvFileWriter", () => {
         // Arrange
         const customers = createCustomers(8);
         const fileWriter = createFileWriter();
-        const sut = createCustomerCsvFileWriter(fileWriter);
+        const csvFileWriter = createCustomerCsvFileWriter(fileWriter);
+        const sut = new BatchedCustomerCsvFileWriter(csvFileWriter);
         const fileName = "batchedcust.csv";
         // Act
-        sut.writeCustomersBatched(fileName, customers);
+        sut.writeCustomers(fileName, customers);
         // Assert
         fileWriter.assertCustomerWereWrittenToFile(fileName, customers);
       });
