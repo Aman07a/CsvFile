@@ -15,8 +15,9 @@ export class CustomerCsvFileWriter {
 
   writeCustomersBatched(fileName: string, customers: Customer[]) {
     if (customers.length > 10) {
-      let baseFileName = fileName.substring(0, fileName.lastIndexOf("."));
-      let extension = fileName.substring(fileName.lastIndexOf("."));
+      const extensionStart = fileName.lastIndexOf(".");
+      let baseFileName = fileName.substring(0, extensionStart) || fileName;
+      let extension = fileName.substring(extensionStart);
       let batchFileName = "";
       let batchStart = 0;
       let batchEnd = 0;

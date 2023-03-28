@@ -34,8 +34,7 @@ describe("CustomerCsvFileWriter", () => {
         // Act
         sut.writeCustomers(fileName, customers);
         // Assert
-        assertCustomerWereWrittenToFile(fileWriter, fileName, customers);
-        expect(fileWriter.writeLine).toHaveBeenCalledTimes(customers.length);
+        fileWriter.assertCustomerWereWrittenToFile(fileName, customers);
       });
     });
 
@@ -53,8 +52,7 @@ describe("CustomerCsvFileWriter", () => {
         sut.writeCustomers(fileName, customers);
         // Assert
         expect(fileWriter.writeLine).toHaveBeenCalledTimes(1);
-        assertCustomerWereWrittenToFile(fileWriter, fileName, customers);
-        expect(fileWriter.writeLine).toHaveBeenCalledTimes(customers.length);
+        fileWriter.assertCustomerWereWrittenToFile(fileName, customers);
       });
     });
 
@@ -72,8 +70,7 @@ describe("CustomerCsvFileWriter", () => {
         // Act
         sut.writeCustomers(fileName, customers);
         // Assert
-        assertCustomerWereWrittenToFile(fileWriter, fileName, customers);
-        expect(fileWriter.writeLine).toHaveBeenCalledTimes(customers.length);
+        fileWriter.assertCustomerWereWrittenToFile(fileName, customers);
       });
     });
   });
@@ -89,8 +86,7 @@ describe("CustomerCsvFileWriter", () => {
         // Act
         sut.writeCustomersBatched(fileName, customers);
         // Assert
-        assertCustomerWereWrittenToFile(fileWriter, fileName, customers);
-        expect(fileWriter.writeLine).toHaveBeenCalledTimes(customers.length);
+        fileWriter.assertCustomerWereWrittenToFile(fileName, customers);
       });
     });
 
@@ -103,17 +99,14 @@ describe("CustomerCsvFileWriter", () => {
         // Act
         sut.writeCustomersBatched("batchedcust.csv", customers);
         // Assert
-        assertCustomerWereWrittenToFile(
-          fileWriter,
+        fileWriter.assertCustomerWereWrittenToFile(
           "batchedcust1.csv",
           customers.slice(0, 10)
         );
-        assertCustomerWereWrittenToFile(
-          fileWriter,
+        fileWriter.assertCustomerWereWrittenToFile(
           "batchedcust2.csv",
           customers.slice(10, 12)
         );
-        expect(fileWriter.writeLine).toHaveBeenCalledTimes(customers.length);
       });
 
       test("given 23 should batch in groups of 10, 10 and 3", () => {
@@ -124,22 +117,47 @@ describe("CustomerCsvFileWriter", () => {
         // Act
         sut.writeCustomersBatched("batchedcustomers.txt", customers);
         // Assert
-        assertCustomerWereWrittenToFile(
-          fileWriter,
+        fileWriter.assertCustomerWereWrittenToFile(
           "batchedcustomers1.txt",
           customers.slice(0, 10)
         );
-        assertCustomerWereWrittenToFile(
-          fileWriter,
+        fileWriter.assertCustomerWereWrittenToFile(
           "batchedcustomers2.txt",
           customers.slice(10, 20)
         );
-        assertCustomerWereWrittenToFile(
-          fileWriter,
+        fileWriter.assertCustomerWereWrittenToFile(
           "batchedcustomers3.txt",
           customers.slice(20, 23)
         );
-        expect(fileWriter.writeLine).toHaveBeenCalledTimes(customers.length);
+      });
+
+      test("should write all", () => {
+        // Arrange
+        const customers = createCustomers(100);
+        const fileWriter = createFileWriter();
+        const sut = createCustomerCsvFileWriter(fileWriter);
+        // Act
+        sut.writeCustomersBatched("batchedcustomers.txt", customers);
+        // Assert
+        fileWriter.assertNumberOfCustomersWritten(customers.length);
+      });
+
+      test("should name files correctly without extension", () => {
+        // Arrange
+        const customers = createCustomers(15);
+        const fileWriter = createFileWriter();
+        const sut = createCustomerCsvFileWriter(fileWriter);
+        // Act
+        sut.writeCustomersBatched("noext", customers);
+        // Assert
+        fileWriter.assertCustomerWereWrittenToFile(
+          "noext1",
+          customers.slice(0, 10)
+        );
+        fileWriter.assertCustomerWereWrittenToFile(
+          "noext2",
+          customers.slice(10, 20)
+        );
       });
     });
   });
@@ -153,33 +171,13 @@ function createCustomers(numberOfCustomers: number): Customer[] {
   return customers;
 }
 
-function assertCustomerWereWrittenToFile(
-  fileWriter: FileWriter,
-  fileName: string,
-  customers: Customer[]
-) {
-  customers.forEach((customer) => {
-    assertCustomerWasWrittenToFile(fileWriter, fileName, customer);
-  });
-}
-
-function assertCustomerWasWrittenToFile(
-  fileWriter: FileWriter,
-  fileName: string,
-  customer: Customer
-) {
-  expect(fileWriter.writeLine).toHaveBeenCalledWith(
-    fileName,
-    `${customer.name},${customer.contactNumber}`
-  );
-}
-
 interface MockFileWriter extends FileWriter {
   assertCustomerWereWrittenToFile(
     fileName: string,
     customers: Customer[]
   ): void;
   assertCustomerWasWrittenToFile(fileName: string, customer: Customer): void;
+  assertNumberOfCustomersWritten(numberOfCustomers: number): void;
 }
 
 function createFileWriter(): MockFileWriter {
@@ -201,6 +199,9 @@ function createFileWriter(): MockFileWriter {
         fileName,
         `${customer.name},${customer.contactNumber}`
       );
+    },
+    assertNumberOfCustomersWritten: function (numberOfCustomers: number) {
+      expect(this.writeLine).toHaveBeenCalledTimes(numberOfCustomers);
     },
   };
 }
