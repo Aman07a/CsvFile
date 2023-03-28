@@ -5,9 +5,9 @@
 // Interface Segregation Principle
 // Dependency Inversion Principle
 
+import { createCustomer, createFileWriter } from "./customer-test-helpers";
 import { Customer } from "./customer";
-import { CustomerCsvFileWriter } from "./customer-csv-file-writer";
-import { FileWriter } from "./file-writer";
+import { createCustomerCsvFileWriter } from "./customer-csv-file-writer";
 
 describe("CustomerCsvFileWriter", () => {
   describe("writeCustomers", () => {
@@ -75,46 +75,3 @@ describe("CustomerCsvFileWriter", () => {
     });
   });
 });
-
-export interface MockFileWriter extends FileWriter {
-  assertCustomerWereWrittenToFile(
-    fileName: string,
-    customers: Customer[]
-  ): void;
-  assertCustomerWasWrittenToFile(fileName: string, customer: Customer): void;
-  assertNumberOfCustomersWritten(numberOfCustomers: number): void;
-}
-
-export function createFileWriter(): MockFileWriter {
-  return {
-    writeLine: jest.fn(),
-    assertCustomerWereWrittenToFile: function (
-      fileName: string,
-      customers: Customer[]
-    ) {
-      customers.forEach((customer) => {
-        this.assertCustomerWasWrittenToFile(fileName, customer);
-      });
-    },
-    assertCustomerWasWrittenToFile: function (
-      fileName: string,
-      customer: Customer
-    ) {
-      expect(this.writeLine).toHaveBeenCalledWith(
-        fileName,
-        `${customer.name},${customer.contactNumber}`
-      );
-    },
-    assertNumberOfCustomersWritten: function (numberOfCustomers: number) {
-      expect(this.writeLine).toHaveBeenCalledTimes(numberOfCustomers);
-    },
-  };
-}
-
-export function createCustomerCsvFileWriter(fileWriter: FileWriter) {
-  return new CustomerCsvFileWriter(fileWriter);
-}
-
-export function createCustomer(name: string, contactNumber: string) {
-  return new Customer(name, contactNumber);
-}

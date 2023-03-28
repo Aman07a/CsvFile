@@ -5,23 +5,22 @@
 // Interface Segregation Principle
 // Dependency Inversion Principle
 
-import { Customer } from "./customer";
-import { BatchedCustomerCsvFileWriter } from "./batched-csv-file-writer";
+import { BatchedCustomerFileWriter } from "./batched-customer-file-writer";
+import { createCustomerCsvFileWriter } from "./customer-csv-file-writer";
 import {
-  MockFileWriter,
-  createCustomer,
-  createCustomerCsvFileWriter,
+  createCustomers,
   createFileWriter,
-} from "./customer-csv-file-writer.test";
+  MockFileWriter,
+} from "./customer-test-helpers";
 
-describe("BatchedCustomerCsvFileWriter", () => {
+describe("BatchedCustomerFileWriter", () => {
   describe("writeCustomers", () => {
     describe("less than 10 customers", () => {
       test("should not batch in one group", () => {
         // Arrange
         const customers = createCustomers(8);
         const fileWriter = createFileWriter();
-        const sut = createBatchedCustomerCsvFileWriter(fileWriter);
+        const sut = createBatchedCustomerFileWriter(fileWriter);
         const fileName = "batchedcust.csv";
         // Act
         sut.writeCustomers(fileName, customers);
@@ -36,7 +35,7 @@ describe("BatchedCustomerCsvFileWriter", () => {
         // Arrange
         const customers = createCustomers(12);
         const fileWriter = createFileWriter();
-        const sut = createBatchedCustomerCsvFileWriter(fileWriter);
+        const sut = createBatchedCustomerFileWriter(fileWriter);
         // Act
         sut.writeCustomers("batchedcust.csv", customers);
         // Assert
@@ -54,7 +53,7 @@ describe("BatchedCustomerCsvFileWriter", () => {
         // Arrange
         const customers = createCustomers(23);
         const fileWriter = createFileWriter();
-        const sut = createBatchedCustomerCsvFileWriter(fileWriter);
+        const sut = createBatchedCustomerFileWriter(fileWriter);
         // Act
         sut.writeCustomers("batchedcustomers.txt", customers);
         // Assert
@@ -76,7 +75,7 @@ describe("BatchedCustomerCsvFileWriter", () => {
         // Arrange
         const customers = createCustomers(100);
         const fileWriter = createFileWriter();
-        const sut = createBatchedCustomerCsvFileWriter(fileWriter);
+        const sut = createBatchedCustomerFileWriter(fileWriter);
         // Act
         sut.writeCustomers("batchedcustomers.txt", customers);
         // Assert
@@ -87,7 +86,7 @@ describe("BatchedCustomerCsvFileWriter", () => {
         // Arrange
         const customers = createCustomers(15);
         const fileWriter = createFileWriter();
-        const sut = createBatchedCustomerCsvFileWriter(fileWriter);
+        const sut = createBatchedCustomerFileWriter(fileWriter);
         // Act
         sut.writeCustomers("noext", customers);
         // Assert
@@ -107,10 +106,7 @@ describe("BatchedCustomerCsvFileWriter", () => {
         // Arrange
         const customers = createCustomers(8);
         const fileWriter = createFileWriter();
-        const sut = createBatchedCustomerCsvFileWriterWithBatchSize(
-          fileWriter,
-          5
-        );
+        const sut = createBatchedCustomerFileWriterWithBatchSize(fileWriter, 5);
         // Act
         sut.writeCustomers("batchedcustomers.txt", customers);
         // Assert
@@ -127,23 +123,15 @@ describe("BatchedCustomerCsvFileWriter", () => {
   });
 });
 
-function createBatchedCustomerCsvFileWriter(fileWriter: MockFileWriter) {
+function createBatchedCustomerFileWriter(fileWriter: MockFileWriter) {
   const csvFileWriter = createCustomerCsvFileWriter(fileWriter);
-  return new BatchedCustomerCsvFileWriter(csvFileWriter);
+  return new BatchedCustomerFileWriter(csvFileWriter);
 }
 
-function createBatchedCustomerCsvFileWriterWithBatchSize(
+function createBatchedCustomerFileWriterWithBatchSize(
   fileWriter: MockFileWriter,
   batchSize: number
 ) {
   const csvFileWriter = createCustomerCsvFileWriter(fileWriter);
-  return new BatchedCustomerCsvFileWriter(csvFileWriter, batchSize);
-}
-
-function createCustomers(numberOfCustomers: number): Customer[] {
-  const customers: Customer[] = [];
-  for (let i = 0; i < numberOfCustomers; i += 1) {
-    customers.push(createCustomer(i.toString(), i.toString()));
-  }
-  return customers;
+  return new BatchedCustomerFileWriter(csvFileWriter, batchSize);
 }

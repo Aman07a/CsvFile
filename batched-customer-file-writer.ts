@@ -1,7 +1,7 @@
 import { Customer } from "./customer";
 import { CustomerFileWriter } from "./CustomerFileWriter";
 
-export class BatchedCustomerCsvFileWriter implements CustomerFileWriter {
+export class BatchedCustomerFileWriter implements CustomerFileWriter {
   constructor(
     private customerFileWriter: CustomerFileWriter,
     private batchSize: number = 10

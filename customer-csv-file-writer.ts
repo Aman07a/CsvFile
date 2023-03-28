@@ -18,3 +18,7 @@ export class CustomerCsvFileWriter implements CustomerFileWriter {
     return `${customer.name},${customer.contactNumber}`;
   }
 }
+
+export function createCustomerCsvFileWriter(fileWriter: FileWriter) {
+  return new CustomerCsvFileWriter(fileWriter);
+}
