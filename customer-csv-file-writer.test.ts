@@ -82,8 +82,7 @@ describe("CustomerCsvFileWriter", () => {
         // Arrange
         const customers = createCustomers(8);
         const fileWriter = createFileWriter();
-        const csvFileWriter = createCustomerCsvFileWriter(fileWriter);
-        const sut = new BatchedCustomerCsvFileWriter(csvFileWriter);
+        const sut = createBatchedCustomerCsvFileWriter(fileWriter);
         const fileName = "batchedcust.csv";
         // Act
         sut.writeCustomers(fileName, customers);
@@ -97,9 +96,9 @@ describe("CustomerCsvFileWriter", () => {
         // Arrange
         const customers = createCustomers(12);
         const fileWriter = createFileWriter();
-        const sut = createCustomerCsvFileWriter(fileWriter);
+        const sut = createBatchedCustomerCsvFileWriter(fileWriter);
         // Act
-        sut.writeCustomersBatched("batchedcust.csv", customers);
+        sut.writeCustomers("batchedcust.csv", customers);
         // Assert
         fileWriter.assertCustomerWereWrittenToFile(
           "batchedcust1.csv",
@@ -115,9 +114,9 @@ describe("CustomerCsvFileWriter", () => {
         // Arrange
         const customers = createCustomers(23);
         const fileWriter = createFileWriter();
-        const sut = createCustomerCsvFileWriter(fileWriter);
+        const sut = createBatchedCustomerCsvFileWriter(fileWriter);
         // Act
-        sut.writeCustomersBatched("batchedcustomers.txt", customers);
+        sut.writeCustomers("batchedcustomers.txt", customers);
         // Assert
         fileWriter.assertCustomerWereWrittenToFile(
           "batchedcustomers1.txt",
@@ -137,9 +136,9 @@ describe("CustomerCsvFileWriter", () => {
         // Arrange
         const customers = createCustomers(100);
         const fileWriter = createFileWriter();
-        const sut = createCustomerCsvFileWriter(fileWriter);
+        const sut = createBatchedCustomerCsvFileWriter(fileWriter);
         // Act
-        sut.writeCustomersBatched("batchedcustomers.txt", customers);
+        sut.writeCustomers("batchedcustomers.txt", customers);
         // Assert
         fileWriter.assertNumberOfCustomersWritten(customers.length);
       });
@@ -148,9 +147,9 @@ describe("CustomerCsvFileWriter", () => {
         // Arrange
         const customers = createCustomers(15);
         const fileWriter = createFileWriter();
-        const sut = createCustomerCsvFileWriter(fileWriter);
+        const sut = createBatchedCustomerCsvFileWriter(fileWriter);
         // Act
-        sut.writeCustomersBatched("noext", customers);
+        sut.writeCustomers("noext", customers);
         // Assert
         fileWriter.assertCustomerWereWrittenToFile(
           "noext1",
@@ -164,6 +163,11 @@ describe("CustomerCsvFileWriter", () => {
     });
   });
 });
+
+function createBatchedCustomerCsvFileWriter(fileWriter: MockFileWriter) {
+  const csvFileWriter = createCustomerCsvFileWriter(fileWriter);
+  return new BatchedCustomerCsvFileWriter(csvFileWriter);
+}
 
 function createCustomers(numberOfCustomers: number): Customer[] {
   const customers: Customer[] = [];

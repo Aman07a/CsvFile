@@ -12,7 +12,7 @@ export class BatchedCustomerCsvFileWriter {
       let batchFileName = "";
       let batchStart = 0;
       let batchEnd = 0;
-      let batchCount = Math.ceil(customers.length / 5);
+      let batchCount = Math.ceil(customers.length / 10);
       for (let batch = 1; batch <= batchCount; batch += 1) {
         batchFileName = baseFileName + batch + extension;
         batchStart = (batch - 1) * 10;
@@ -37,30 +37,6 @@ export class CustomerCsvFileWriter {
     customers.forEach((customer) => {
       this.fileWriter.writeLine(fileName, this.formatAsCsvRow(customer));
     });
-  }
-
-  writeCustomersBatched(fileName: string, customers: Customer[]) {
-    if (customers.length > 10) {
-      const extensionStart = fileName.lastIndexOf(".");
-      let baseFileName = fileName.substring(0, extensionStart) || fileName;
-      let extension =
-        extensionStart > 0 ? fileName.substring(extensionStart) : "";
-      let batchFileName = "";
-      let batchStart = 0;
-      let batchEnd = 0;
-      let batchCount = Math.ceil(customers.length / 10);
-      for (let batch = 1; batch <= batchCount; batch += 1) {
-        batchFileName = baseFileName + batch + extension;
-        batchStart = (batch - 1) * 10;
-        batchEnd = batchStart + 10;
-        this.writeCustomers(
-          batchFileName,
-          customers.slice(batchStart, batchEnd)
-        );
-      }
-    } else {
-      this.writeCustomers(fileName, customers);
-    }
   }
 
   private formatAsCsvRow(customer: Customer): string {
