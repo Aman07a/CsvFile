@@ -82,16 +82,7 @@ describe("CustomerCsvFileWriter", () => {
     describe("less than 10 customers", () => {
       test("should not batch in one group", () => {
         // Arrange
-        const customers = [
-          createCustomer("a", "1"),
-          createCustomer("b", "2"),
-          createCustomer("c", "3"),
-          createCustomer("d", "4"),
-          createCustomer("e", "5"),
-          createCustomer("f", "6"),
-          createCustomer("g", "7"),
-          createCustomer("h", "8"),
-        ];
+        const customers = createCustomers(8);
         const fileWriter = createFileWriter();
         const sut = createCustomerCsvFileWriter(fileWriter);
         const fileName = "batchedcust.csv";
@@ -104,22 +95,9 @@ describe("CustomerCsvFileWriter", () => {
     });
 
     describe("more than 10 customers", () => {
-      test("should not batch in groups of 10", () => {
+      test("given 12 should batch in groups of 10 and 2", () => {
         // Arrange
-        const customers = [
-          createCustomer("a", "1"),
-          createCustomer("b", "2"),
-          createCustomer("c", "3"),
-          createCustomer("d", "4"),
-          createCustomer("e", "5"),
-          createCustomer("f", "6"),
-          createCustomer("g", "7"),
-          createCustomer("h", "8"),
-          createCustomer("i", "9"),
-          createCustomer("j", "10"),
-          createCustomer("k", "11"),
-          createCustomer("l", "12"),
-        ];
+        const customers = createCustomers(12);
         const fileWriter = createFileWriter();
         const sut = createCustomerCsvFileWriter(fileWriter);
         // Act
@@ -137,9 +115,43 @@ describe("CustomerCsvFileWriter", () => {
         );
         expect(fileWriter.writeLine).toHaveBeenCalledTimes(customers.length);
       });
+
+      test("given 23 should batch in groups of 10, 10 and 3", () => {
+        // Arrange
+        const customers = createCustomers(23);
+        const fileWriter = createFileWriter();
+        const sut = createCustomerCsvFileWriter(fileWriter);
+        // Act
+        sut.writeCustomersBatched("batchedcustomers.txt", customers);
+        // Assert
+        assertCustomerWereWrittenToFile(
+          fileWriter,
+          "batchedcustomers1.txt",
+          customers.slice(0, 10)
+        );
+        assertCustomerWereWrittenToFile(
+          fileWriter,
+          "batchedcustomers2.txt",
+          customers.slice(10, 20)
+        );
+        assertCustomerWereWrittenToFile(
+          fileWriter,
+          "batchedcustomers3.txt",
+          customers.slice(20, 23)
+        );
+        expect(fileWriter.writeLine).toHaveBeenCalledTimes(customers.length);
+      });
     });
   });
 });
+
+function createCustomers(numberOfCustomers: number): Customer[] {
+  const customers: Customer[] = [];
+  for (let i = 0; i < numberOfCustomers; i += 1) {
+    customers.push(createCustomer(i.toString(), i.toString()));
+  }
+  return customers;
+}
 
 function assertCustomerWereWrittenToFile(
   fileWriter: FileWriter,
@@ -162,9 +174,34 @@ function assertCustomerWasWrittenToFile(
   );
 }
 
-function createFileWriter(): FileWriter {
+interface MockFileWriter extends FileWriter {
+  assertCustomerWereWrittenToFile(
+    fileName: string,
+    customers: Customer[]
+  ): void;
+  assertCustomerWasWrittenToFile(fileName: string, customer: Customer): void;
+}
+
+function createFileWriter(): MockFileWriter {
   return {
     writeLine: jest.fn(),
+    assertCustomerWereWrittenToFile: function (
+      fileName: string,
+      customers: Customer[]
+    ) {
+      customers.forEach((customer) => {
+        this.assertCustomerWasWrittenToFile(fileName, customer);
+      });
+    },
+    assertCustomerWasWrittenToFile: function (
+      fileName: string,
+      customer: Customer
+    ) {
+      expect(this.writeLine).toHaveBeenCalledWith(
+        fileName,
+        `${customer.name},${customer.contactNumber}`
+      );
+    },
   };
 }
 
