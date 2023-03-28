@@ -30,6 +30,40 @@ describe("DeduplicatingCustomerCsvFileWriter", () => {
         fileWriter.assertNumberOfCustomersWritten(customers.length);
       });
     });
+
+    // describe("one duplicate", () => {
+    //   test("should write only one entry of the duplicate", () => {
+    //     // Arrange
+    //     const expected = createCustomer("Peter", "12");
+    //     const customers = [expected, createCustomer("Peter", "123")];
+    //     const fileWriter = createFileWriter();
+    //     const sut = createDeduplicatingCustomerCsvFileWriter(fileWriter);
+    //     const fileName = "deduped.csv";
+    //     // Act
+    //     sut.writeCustomers(fileName, customers);
+    //     // Assert
+    //     fileWriter.assertCustomerWereWrittenToFile(fileName, [expected]);
+    //     fileWriter.assertNumberOfCustomersWritten(1);
+    //   });
+    // });
+
+    test("learning", () => {
+      const expected = createCustomer("Peter", "12");
+      const customers = [
+        expected,
+        createCustomer("Peter", "123"),
+        createCustomer("Peter", "123"),
+        createCustomer("Peter", "123"),
+        createCustomer("Peter", "123"),
+      ];
+
+      const final = customers.filter(
+        (customer, index, array) =>
+          array.findIndex((cust) => customer.name === cust.name) === index
+      );
+
+      expect(final).toStrictEqual([expected]);
+    });
   });
 });
 
